@@ -11,6 +11,17 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import modules.*;
 
+import javax.print.*;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.JobName;
+import javax.print.attribute.standard.MediaSizeName;
+import javax.print.attribute.standard.OrientationRequested;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.util.List;
+
 public class Controller {
     private static final long serialVersionUID = 7813064106536867782L;
     public int iReturn;
@@ -93,7 +104,64 @@ public class Controller {
 
     @FXML
     protected void onPrintClicked(ActionEvent e) {
-        System.out.println("Top Gourmet Açaiteria");
-        System.out.println(comanda);
+        //System.out.println("Top Gourmet Açaiteria");
+        //System.out.println(comanda);
+        List<Item> items = comanda.getItems();
+        float total = 0;
+        DecimalFormat df = new DecimalFormat("0.00");
+        String nota = "          TOP GOURMET AÇAITERIA \n"
+                    + "------------------------------------------ \n"
+                    + "Descrição                             R$ \n";
+        for (int i = 0; i < items.size(); i++){
+            switch (items.get(i).getDescricption()){
+                case "ALMOÇO":
+                    nota += "ALMOÇO                               " + df.format(items.get(i).getValor()) + "\n";
+                    break;
+                case "SUCOS":
+                    nota += "SUCOS                                " + df.format(items.get(i).getValor()) + "\n";
+                    break;
+                case "REFRIGERANTE":
+                    nota += "REFRIGERANTE                         " + df.format(items.get(i).getValor()) + "\n";
+                    break;
+                case "SORVETE":
+                    nota += "SORVETE                              " + df.format(items.get(i).getValor()) + "\n";
+                    break;
+            }
+            total += items.get(i).getValor();
+        }
+        nota += "------------------------------------------ \n"
+                + "                             TOTAL: " + df.format(total) + "\n\n"
+                + "         OBRIGADO, VOLTE SEMPRE!         ";
+        imprimir(nota);
+        System.out.println(nota);
+    }
+
+
+    private void imprimir(String comanda) {
+        try {
+            System.out.println("IMPRIMINDO");
+            InputStream prin = new ByteArrayInputStream(comanda.getBytes());
+            DocFlavor docFlavor = DocFlavor.INPUT_STREAM.AUTOSENSE;
+            SimpleDoc simpleDoc = new SimpleDoc(prin, docFlavor, null);
+            PrintService printService = PrintServiceLookup.lookupDefaultPrintService();
+            PrintRequestAttributeSet printAttributes = new HashPrintRequestAttributeSet();
+
+            printAttributes.add(new JobName("Impressao", null));
+            printAttributes.add(OrientationRequested.PORTRAIT);
+            printAttributes.add(MediaSizeName.ISO_A4);
+
+            DocPrintJob printJob = printService.createPrintJob();
+
+            try {
+                printJob.print(simpleDoc, (PrintRequestAttributeSet) printAttributes);
+            } catch (Exception e) {
+                System.out.printf("NÃO FOI POSSÍVEL REALIZAR A IMPRESSÃO!!!");
+            }
+
+            prin.close();
+
+        } catch (Exception e) {
+            System.out.println("erooooo");
+        }
     }
 }

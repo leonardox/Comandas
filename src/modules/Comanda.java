@@ -27,4 +27,7 @@ public class Comanda {
         result += "---------------------------------------- \n         Total: R$ " + total + "\n";
         return result;
     }
+    public List<Item> getItems() {
+        return items;
+    }
 }
